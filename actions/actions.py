@@ -28,9 +28,9 @@ class ActionAskEmail(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict]:
         if tracker.get_slot("previous_email"):
-            dispatcher.utter_message(template=f"utter_ask_use_previous_email",)
+            dispatcher.utter_message(template="utter_ask_use_previous_email")
         else:
-            dispatcher.utter_message(template=f"utter_ask_email")
+            dispatcher.utter_message(template="utter_ask_email")
         return []
 
 
@@ -50,9 +50,7 @@ def _validate_email(
         return {"email": value}
 
     results = snow.email_to_sysid(value)
-    caller_id = results.get("caller_id")
-
-    if caller_id:
+    if caller_id := results.get("caller_id"):
         return {"email": value, "caller_id": caller_id}
     elif isinstance(caller_id, list):
         dispatcher.utter_message(template="utter_no_email")
@@ -87,9 +85,8 @@ class ValidateOpenIncidentForm(FormValidationAction):
 
         if value.lower() in snow.priority_db():
             return {"priority": value}
-        else:
-            dispatcher.utter_message(template="utter_no_priority")
-            return {"priority": None}
+        dispatcher.utter_message(template="utter_no_priority")
+        return {"priority": None}
 
 
 class ActionOpenIncident(Action):
@@ -134,10 +131,9 @@ class ActionOpenIncident(Action):
                 priority=snow_priority,
                 email=email,
             )
-            incident_number = (
+            if incident_number := (
                 response.get("content", {}).get("result", {}).get("number")
-            )
-            if incident_number:
+            ):
                 message = (
                     f"Successfully opened up incident {incident_number} "
                     f"for you. Someone will reach out soon."
@@ -195,8 +191,7 @@ class ActionCheckIncidentStatus(Action):
             )
         else:
             incidents_result = snow.retrieve_incidents(email)
-            incidents = incidents_result.get("incidents")
-            if incidents:
+            if incidents := incidents_result.get("incidents"):
                 message = "\n".join(
                     [
                         f'Incident {i.get("number")}: '

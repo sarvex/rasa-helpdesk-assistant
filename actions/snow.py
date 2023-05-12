@@ -27,12 +27,12 @@ class SnowAPI(object):
         self.snow_pw = snow_config.get("snow_pw")
         self.snow_instance = snow_config.get("snow_instance")
         self.localmode = snow_config.get("localmode", True)
-        self.base_api_url = "https://{}/api/now".format(self.snow_instance)
+        self.base_api_url = f"https://{self.snow_instance}/api/now"
 
     def handle_request(
         self, request_method=requests.get, request_args={}
     ) -> Dict[Text, Any]:
-        result = dict()
+        result = {}
         try:
             response = request_method(**request_args)
             result["status_code"] = response.status_code
@@ -76,8 +76,7 @@ class SnowAPI(object):
 
     def retrieve_incidents(self, email) -> Dict[Text, Any]:
         result = self.email_to_sysid(email)
-        caller_id = result.get("caller_id")
-        if caller_id:
+        if caller_id := result.get("caller_id"):
             incident_url = (
                 f"{self.base_api_url}/table/incident?"
                 f"sysparm_query=caller_id={caller_id}"
@@ -89,10 +88,9 @@ class SnowAPI(object):
                 "headers": json_headers,
             }
             result = self.handle_request(requests.get, request_args)
-            incidents = result.get(
+            if incidents := result.get(
                 "content", {}  # pytype: disable=attribute-error
-            ).get("result")
-            if incidents:
+            ).get("result"):
                 result["incidents"] = incidents
             elif isinstance(incidents, list):
                 result["error"] = f"No incidents on record for {email}"
@@ -102,8 +100,7 @@ class SnowAPI(object):
         self, description, short_description, priority, email
     ) -> Dict[Text, Any]:
         result = self.email_to_sysid(email)
-        caller_id = result.get("caller_id")
-        if caller_id:
+        if caller_id := result.get("caller_id"):
             incident_url = f"{self.base_api_url}/table/incident"
             data = {
                 "opened_by": caller_id,
@@ -125,5 +122,4 @@ class SnowAPI(object):
     @staticmethod
     def priority_db() -> Dict[str, int]:
         """Database of supported priorities"""
-        priorities = {"low": 3, "medium": 2, "high": 1}
-        return priorities
+        return {"low": 3, "medium": 2, "high": 1}

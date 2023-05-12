@@ -23,9 +23,7 @@ class ActionHandoffOptions(Action):
         domain: Dict[Text, Any],
     ) -> List[EventType]:
 
-        if not any(
-            [config.get("url") for bot, config in handoff_config.items()]
-        ):
+        if not any(config.get("url") for bot, config in handoff_config.items()):
             dispatcher.utter_message(template="utter_no_handoff")
         else:
             buttons = [
@@ -58,9 +56,7 @@ class ActionHandoff(Action):
         handoff_to = tracker.get_slot("handoff_to")
 
         handoff_bot = handoff_config.get(handoff_to, {})
-        url = handoff_bot.get("url")
-
-        if url:
+        if url := handoff_bot.get("url"):
             if tracker.get_latest_input_channel() == "rest":
                 dispatcher.utter_message(
                     json_message={

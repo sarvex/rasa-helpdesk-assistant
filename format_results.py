@@ -49,10 +49,7 @@ def entity_table():
     classes.sort(key=lambda x: data[x]["support"], reverse=True)
 
     def format_cell(data, c, k):
-        if not data[c].get(k):
-            return "N/A"
-        else:
-            return data[c][k]
+        return "N/A" if not data[c].get(k) else data[c][k]
 
     writer.value_matrix = [
         [c] + [format_cell(data, c, k) for k in cols] for c in classes
